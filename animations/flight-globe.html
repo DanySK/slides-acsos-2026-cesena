@@ -11,8 +11,8 @@
 </head>
 <body>
 <script>
-    const R_start = 2.0;   // radius at Tokyo & Cesena
-    const R_mid   = 3.0;   // radius at LA
+    const R_start = 1.15; // radius at Tokyo & Cesena
+    const R_mid   = 2.0; // radius at LA
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -49,6 +49,26 @@
     const points = waypoints.map(w => latLonToVec3(w.lat, w.lon, 1.05));
     const curve = new THREE.CatmullRomCurve3(points);
 
+    // Marker for Tokyo (small cylinder)
+    const tokyoCoords = { lat: 35.6895, lon: 139.6917 };
+    const tokyoVec = latLonToVec3(tokyoCoords.lat, tokyoCoords.lon, 1.0);
+
+    const tokyoMarker = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.003, 0.003, 0.001, 16), // radiusTop, radiusBottom, height
+        new THREE.MeshPhongMaterial({ color: 0xff0000 })
+    );
+
+    // Cylinder by default points along Y. Rotate so it aligns with tokyoVec.
+    tokyoMarker.quaternion.setFromUnitVectors(
+        new THREE.Vector3(0, 1, 0), // cylinder default "up"
+        tokyoVec.clone().normalize() // direction from globe centre to Tokyo
+    );
+
+    // Position so base is on the surface, sticking out
+    tokyoMarker.position.copy(tokyoVec.clone().multiplyScalar(1.000));
+
+    scene.add(tokyoMarker);
+
     // Load Earth
     new THREE.TextureLoader().load("earth.jpg", (tex) => {
         const earth = new THREE.Mesh(
@@ -58,21 +78,28 @@
         scene.add(earth);
 
         let t = 0;
+        let pauseFrames = 300
         function animate() {
             requestAnimationFrame(animate);
-
-            // progress along path
-            t = Math.min(t + 0.0005, 1);  // slow, stops at Cesena
+            if (pauseFrames > 0) {
+                pauseFrames--;
+            } else {
+                t = Math.min(t + 0.0005, 1); // start moving only after pause
+            }
             const pos = curve.getPointAt(t);
 
-            // camera at scaled position
-            camera.position.copy(pos.clone().normalize().multiplyScalar(3));
-            camera.lookAt(0,0,0);
+            // --- cinematic zoom ---
+            // Map t=0→R_start, t=0.5→R_mid, t=1→R_start
+            let r;
+            if (t <= 0.5) {
+                r = THREE.MathUtils.lerp(R_start, R_mid, t / 0.5);
+            } else {
+                r = THREE.MathUtils.lerp(R_mid, R_start, (t - 0.5) / 0.5);
+            }
 
-            // enforce "north is up"
-            const north = latLonToVec3(90,0,3).normalize();
-            camera.up.copy(north);
-            camera.updateProjectionMatrix();
+            camera.position.copy(pos.clone().normalize().multiplyScalar(r));
+            camera.lookAt(0,0,0);
+            camera.up.copy(latLonToVec3(90,0,3).normalize());
 
             renderer.render(scene, camera);
         }
