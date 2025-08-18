@@ -2,48 +2,89 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Flight animation</title>
+    <title>Flight Path Camera</title>
     <style>
-        html,body { margin:0; height:100%; overflow:hidden; background:#fafafa; }
-        canvas { display:block; }
+        html, body { margin: 0; height: 100%; overflow: hidden; background: #222; }
+        canvas { display: block; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three-globe@2.30.0"></script>
 </head>
 <body>
 <script>
-    const renderer = new THREE.WebGLRenderer({antialias:true});
+    const R_start = 2.0;   // radius at Tokyo & Cesena
+    const R_mid   = 3.0;   // radius at LA
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 2000);
-    camera.position.z = 400;
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 1000);
 
-    const light = new THREE.AmbientLight(0xffffff, 1);
-    scene.add(light);
+    // Lighting
+    scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+    const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+    dir.position.set(5,3,5);
+    scene.add(dir);
 
-    const globe = new ThreeGlobe()
-        .globeImageUrl('//unpkg.com/three-globe/example/img/earth-light.jpg')
-        .arcsData([
-            { startLat:35.6895, startLng:139.6917, endLat:34.0522, endLng:-118.2437 }, // Tokyo→LA
-            { startLat:34.0522, startLng:-118.2437, endLat:44.1391, endLng:12.2466 }   // LA→Cesena
-        ])
-        .arcColor(() => ['#ff5555','#ff5555'])
-        .arcStroke(0.9)
-        .arcAltitude(0.2)
-        .arcDashLength(0.9)
-        .arcDashGap(2)
-        .arcDashAnimateTime(5000);
-
-    scene.add(globe);
-
-    function animate() {
-        globe.rotation.y += 0.002; // world moving
-        renderer.render(scene, camera);
-        requestAnimationFrame(animate);
+    // lat/lon → XYZ on sphere radius R
+    function latLonToVec3(lat, lon, R=1) {
+        const phi = (90 - lat) * Math.PI/180;
+        const theta = (lon+180) * Math.PI/180;
+        return new THREE.Vector3(
+            -R * Math.sin(phi) * Math.cos(theta),
+            R * Math.cos(phi),
+            R * Math.sin(phi) * Math.sin(theta)
+        );
     }
-    animate();
+
+    // Waypoints (Tokyo → LA → Cesena)
+    const waypoints = [
+        {lat:35.6895, lon:139.6917},   // Tokyo
+        {lat:34.0522, lon:-118.2437},  // LA
+        {lat:44.1391, lon:12.2466}     // Cesena
+    ];
+
+    // Great-circle curve through waypoints
+    const points = waypoints.map(w => latLonToVec3(w.lat, w.lon, 1.05));
+    const curve = new THREE.CatmullRomCurve3(points);
+
+    // Load Earth
+    new THREE.TextureLoader().load("earth.jpg", (tex) => {
+        const earth = new THREE.Mesh(
+            new THREE.SphereGeometry(1,64,64),
+            new THREE.MeshPhongMaterial({ map: tex })
+        );
+        scene.add(earth);
+
+        let t = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // progress along path
+            t = Math.min(t + 0.0005, 1);  // slow, stops at Cesena
+            const pos = curve.getPointAt(t);
+
+            // camera at scaled position
+            camera.position.copy(pos.clone().normalize().multiplyScalar(3));
+            camera.lookAt(0,0,0);
+
+            // enforce "north is up"
+            const north = latLonToVec3(90,0,3).normalize();
+            camera.up.copy(north);
+            camera.updateProjectionMatrix();
+
+            renderer.render(scene, camera);
+        }
+        animate();
+    });
+
+    // Resize
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth/window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
 </script>
 </body>
 </html>
