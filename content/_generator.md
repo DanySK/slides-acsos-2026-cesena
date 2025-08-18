@@ -14,8 +14,6 @@ aliases = [
 
 {{< slide background-iframe="animations/flight-globe.html" background-interactive="true" >}}
 
-## Tokyo → Cesena
-
 ---
 
 {{< slide background-iframe="animations/flight.html" background-interactive="true" >}}
