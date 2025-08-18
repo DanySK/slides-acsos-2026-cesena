@@ -27,6 +27,30 @@
     dir.position.set(5,3,5);
     scene.add(dir);
 
+    // === Tokyo text label ===
+    function makeTextSprite(message, { fontface = "Arial", fontsize = 64, color = "rgba(255,0,0,1.0)" } = {}) {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.font = `${fontsize}px ${fontface}`;
+        const textWidth = ctx.measureText(message).width;
+        canvas.width = textWidth * 2;
+        canvas.height = fontsize * 2;
+        ctx.font = `${fontsize}px ${fontface}`;
+        ctx.fillStyle = color;
+        ctx.textAlign = "left";
+        ctx.textBaseline = "bottom";
+        ctx.fillText(message, canvas.width / 2, canvas.height / 2);
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.minFilter = THREE.LinearFilter;
+        const mat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+        const sprite = new THREE.Sprite(mat);
+        // world scale (tune to size you want on globe)
+        const scale = 0.05;
+        sprite.scale.set(scale, scale * (canvas.height / canvas.width), 1);
+        return sprite;
+    }
+
+
     // lat/lon → XYZ on sphere radius R
     function latLonToVec3(lat, lon, R=1) {
         const phi = (90 - lat) * Math.PI/180;
@@ -66,8 +90,11 @@
 
     // Position so base is on the surface, sticking out
     tokyoMarker.position.copy(tokyoVec.clone().multiplyScalar(1.000));
-
     scene.add(tokyoMarker);
+
+    const tokyoLabel = makeTextSprite("Tokyo", { fontsize: 1000 });
+    tokyoLabel.position.copy(tokyoVec.clone().multiplyScalar(1.001)); // offset above Tokyo
+    scene.add(tokyoLabel);
 
     // Load Earth
     new THREE.TextureLoader().load("earth.jpg", (tex) => {
@@ -85,22 +112,19 @@
                 pauseFrames--;
             } else {
                 t = Math.min(t + 0.0005, 1); // start moving only after pause
+                // Hide label after pause
+                tokyoLabel.visible = false;
             }
             const pos = curve.getPointAt(t);
-
-            // --- cinematic zoom ---
-            // Map t=0→R_start, t=0.5→R_mid, t=1→R_start
             let r;
             if (t <= 0.5) {
                 r = THREE.MathUtils.lerp(R_start, R_mid, t / 0.5);
             } else {
                 r = THREE.MathUtils.lerp(R_mid, R_start, (t - 0.5) / 0.5);
             }
-
             camera.position.copy(pos.clone().normalize().multiplyScalar(r));
             camera.lookAt(0,0,0);
             camera.up.copy(latLonToVec3(90,0,3).normalize());
-
             renderer.render(scene, camera);
         }
         animate();
