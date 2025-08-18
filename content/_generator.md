@@ -10,6 +10,16 @@ aliases = [
 
 +++
 
+---
+## Animated backgrounds
+
+{{< bg type="gradient" >}}
+
+{{< bg type="particles" >}}
+
+{{< bg type="ribbons" >}}
+
+---
 
 # Short guide to Markdown slides
 

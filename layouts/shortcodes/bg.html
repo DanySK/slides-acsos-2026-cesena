@@ -1,0 +1,4 @@
+{{- $type := .Get "type" | default "gradient" -}}
+{{- $interactive := .Get "interactive" | default "true" -}}
+{{- $path := printf "/animations/%s.html" $type -}}
+<!-- .slide: data-background-iframe="{{ $path }}"{{ if or (eq $interactive true) (eq (lower $interactive) "true") }} data-background-interactive{{ end }} -->
