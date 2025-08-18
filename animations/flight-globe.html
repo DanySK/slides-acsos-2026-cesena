@@ -76,25 +76,41 @@
     // Marker for Tokyo (small cylinder)
     const tokyoCoords = { lat: 35.6895, lon: 139.6917 };
     const tokyoVec = latLonToVec3(tokyoCoords.lat, tokyoCoords.lon, 1.0);
-
     const tokyoMarker = new THREE.Mesh(
         new THREE.CylinderGeometry(0.003, 0.003, 0.001, 16), // radiusTop, radiusBottom, height
         new THREE.MeshPhongMaterial({ color: 0xff0000 })
     );
-
     // Cylinder by default points along Y. Rotate so it aligns with tokyoVec.
     tokyoMarker.quaternion.setFromUnitVectors(
         new THREE.Vector3(0, 1, 0), // cylinder default "up"
         tokyoVec.clone().normalize() // direction from globe centre to Tokyo
     );
-
-    // Position so base is on the surface, sticking out
     tokyoMarker.position.copy(tokyoVec.clone().multiplyScalar(1.000));
     scene.add(tokyoMarker);
-
-    const tokyoLabel = makeTextSprite("Tokyo", { fontsize: 1000 });
+    const tokyoLabel = makeTextSprite("Tokyo", { fontsize: 100 });
     tokyoLabel.position.copy(tokyoVec.clone().multiplyScalar(1.001)); // offset above Tokyo
     scene.add(tokyoLabel);
+
+    // Cesena coords
+    const cesenaCoords = { lat: 44.1391, lon: 12.2466 };
+    const cesenaVec = latLonToVec3(cesenaCoords.lat, cesenaCoords.lon, 1.0);
+    // Marker (same as Tokyo's but hidden at first)
+    const cesenaMarker = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.003, 0.003, 0.001, 16),
+        new THREE.MeshPhongMaterial({ color: 0xff0000 })
+    );
+    cesenaMarker.quaternion.setFromUnitVectors(
+        new THREE.Vector3(0, 1, 0),
+        cesenaVec.clone().normalize()
+    );
+    cesenaMarker.position.copy(cesenaVec.clone().multiplyScalar(1.000));
+    // don’t add yet!
+    // Label (same helper)
+    const cesenaLabel = makeTextSprite("Cesena", { fontsize: 64, color: "rgba(255,0,0,1.0)" });
+    cesenaLabel.position.copy(cesenaVec.clone().multiplyScalar(1.001));
+    // don’t add yet!
+    let cesenaDelayFrames = null;   // will start counting when t hits 1
+    let cesenaAdded = false;
 
     // Load Earth
     new THREE.TextureLoader().load("earth.jpg", (tex) => {
@@ -115,6 +131,18 @@
                 // Hide label after pause
                 tokyoLabel.visible = false;
             }
+            if (t >= 1.0) {
+                if (cesenaDelayFrames === null) {
+                    cesenaDelayFrames = 120; // ~2 seconds
+                } else if (cesenaDelayFrames > 0) {
+                    cesenaDelayFrames--;
+                } else if (!cesenaAdded) {
+                    scene.add(cesenaMarker);
+                    scene.add(cesenaLabel);
+                    cesenaAdded = true;
+                }
+            }
+
             const pos = curve.getPointAt(t);
             let r;
             if (t <= 0.5) {
