@@ -7,6 +7,7 @@
         html, body { margin: 0; height: 100%; overflow: hidden; background: #222; }
         canvas { display: block; }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.min.js"></script>
 </head>
 <body>
@@ -28,7 +29,7 @@
     scene.add(dir);
 
     // === Tokyo text label ===
-    function makeTextSprite(message, { fontface = "Arial", fontsize = 64, color = "rgba(255,0,0,1.0)" } = {}) {
+    function makeTextSprite(message, { fontface = "Audiowide", fontsize = 64, color = "rgba(255,0,0,1.0)" } = {}) {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         ctx.font = `${fontsize}px ${fontface}`;
@@ -77,7 +78,7 @@
     const tokyoCoords = { lat: 35.6895, lon: 139.6917 };
     const tokyoVec = latLonToVec3(tokyoCoords.lat, tokyoCoords.lon, 1.0);
     const tokyoMarker = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.003, 0.003, 0.001, 16), // radiusTop, radiusBottom, height
+        new THREE.CylinderGeometry(0.002, 0.002, 0.001, 16), // radiusTop, radiusBottom, height
         new THREE.MeshPhongMaterial({ color: 0xff0000 })
     );
     // Cylinder by default points along Y. Rotate so it aligns with tokyoVec.
@@ -87,16 +88,20 @@
     );
     tokyoMarker.position.copy(tokyoVec.clone().multiplyScalar(1.000));
     scene.add(tokyoMarker);
-    const tokyoLabel = makeTextSprite("Tokyo", { fontsize: 100 });
-    tokyoLabel.position.copy(tokyoVec.clone().multiplyScalar(1.001)); // offset above Tokyo
-    scene.add(tokyoLabel);
-
+    let tokyoLabel = null;
+    document.fonts.load('64px "Audiowide"').then(() => {
+        const tokyoLabel = makeTextSprite("Tokyo, JP", { fontsize: 100 });
+        tokyoLabel.position.copy(tokyoVec.clone().multiplyScalar(1.001));
+        scene.add(tokyoLabel);
+        // Optional: still hide later
+        setTimeout(() => { tokyoLabel.visible = false; }, 5000);
+    });
     // Cesena coords
     const cesenaCoords = { lat: 44.1391, lon: 12.2466 };
     const cesenaVec = latLonToVec3(cesenaCoords.lat, cesenaCoords.lon, 1.0);
     // Marker (same as Tokyo's but hidden at first)
     const cesenaMarker = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.003, 0.003, 0.001, 16),
+        new THREE.CylinderGeometry(0.002, 0.002, 0.001, 16),
         new THREE.MeshPhongMaterial({ color: 0xff0000 })
     );
     cesenaMarker.quaternion.setFromUnitVectors(
@@ -106,12 +111,11 @@
     cesenaMarker.position.copy(cesenaVec.clone().multiplyScalar(1.000));
     // don’t add yet!
     // Label (same helper)
-    const cesenaLabel = makeTextSprite("Cesena", { fontsize: 64, color: "rgba(255,0,0,1.0)" });
+    const cesenaLabel = makeTextSprite("Cesena, IT", { fontsize: 64, color: "rgba(255,0,0,1.0)" });
     cesenaLabel.position.copy(cesenaVec.clone().multiplyScalar(1.001));
     // don’t add yet!
     let cesenaDelayFrames = null;   // will start counting when t hits 1
     let cesenaAdded = false;
-
     // Load Earth
     new THREE.TextureLoader().load("earth.jpg", (tex) => {
         const earth = new THREE.Mesh(
@@ -119,7 +123,6 @@
             new THREE.MeshPhongMaterial({ map: tex })
         );
         scene.add(earth);
-
         let t = 0;
         let pauseFrames = 300
         function animate() {
@@ -129,7 +132,7 @@
             } else {
                 t = Math.min(t + 0.0005, 1); // start moving only after pause
                 // Hide label after pause
-                tokyoLabel.visible = false;
+                if (tokyoLabel) tokyoLabel.visible = false;
             }
             if (t >= 1.0) {
                 if (cesenaDelayFrames === null) {
@@ -142,7 +145,6 @@
                     cesenaAdded = true;
                 }
             }
-
             const pos = curve.getPointAt(t);
             let r;
             if (t <= 0.5) {
