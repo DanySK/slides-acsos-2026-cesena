@@ -13,7 +13,7 @@
 <body>
 <script>
     const R_start = 1.15; // radius at Tokyo & Cesena
-    const R_mid   = 2.0; // radius at LA
+    const R_mid   = 2.0;  // radius at LA
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -23,12 +23,40 @@
     const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 1000);
 
     // Lighting
-    scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-    const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+    const dir = new THREE.DirectionalLight(0xffffff, 1);
     dir.position.set(5,3,5);
     scene.add(dir);
 
-    // === Tokyo text label ===
+    // === fade helpers ===
+    function fadeIn(obj, duration = 60) {
+        obj.visible = true;
+        if (obj.material) {
+            obj.material.transparent = true;
+            obj.material.opacity = 0;
+        }
+        let f = 0;
+        function step() {
+            f++;
+            if (obj.material) obj.material.opacity = Math.min(1, f/duration);
+            if (f < duration) requestAnimationFrame(step);
+        }
+        step();
+    }
+    function fadeOut(obj, duration = 60) {
+        if (!obj.visible) return;
+        if (obj.material) obj.material.transparent = true;
+        let f = duration;
+        function step() {
+            f--;
+            if (obj.material) obj.material.opacity = Math.max(0, f/duration);
+            if (f > 0) requestAnimationFrame(step);
+            else obj.visible = false;
+        }
+        step();
+    }
+
+    // === Text sprite helper ===
     function makeTextSprite(message, { fontface = "Audiowide", fontsize = 64, color = "rgba(255,0,0,1.0)" } = {}) {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -45,14 +73,12 @@
         texture.minFilter = THREE.LinearFilter;
         const mat = new THREE.SpriteMaterial({ map: texture, transparent: true });
         const sprite = new THREE.Sprite(mat);
-        // world scale (tune to size you want on globe)
         const scale = 0.05;
-        sprite.scale.set(scale, scale * (canvas.height / canvas.width), 1);
+        sprite.scale.set(scale, scale * (canvas.height/canvas.width), 1);
         return sprite;
     }
 
-
-    // lat/lon → XYZ on sphere radius R
+    // lat/lon → XYZ
     function latLonToVec3(lat, lon, R=1) {
         const phi = (90 - lat) * Math.PI/180;
         const theta = (lon+180) * Math.PI/180;
@@ -63,95 +89,96 @@
         );
     }
 
-    // Waypoints (Tokyo → LA → Cesena)
+    // Waypoints
     const waypoints = [
         {lat:35.6895, lon:139.6917},   // Tokyo
         {lat:34.0522, lon:-118.2437},  // LA
         {lat:44.1391, lon:12.2466}     // Cesena
     ];
-
-    // Great-circle curve through waypoints
     const points = waypoints.map(w => latLonToVec3(w.lat, w.lon, 1.05));
     const curve = new THREE.CatmullRomCurve3(points);
 
-    // Marker for Tokyo (small cylinder)
-    const tokyoCoords = { lat: 35.6895, lon: 139.6917 };
+    // --- Tokyo marker + label ---
+    const tokyoCoords = waypoints[0];
     const tokyoVec = latLonToVec3(tokyoCoords.lat, tokyoCoords.lon, 1.0);
     const tokyoMarker = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.002, 0.002, 0.001, 16), // radiusTop, radiusBottom, height
-        new THREE.MeshPhongMaterial({ color: 0xff0000 })
+        new THREE.CylinderGeometry(0.0015, 0.0015, 0.001, 16),
+        new THREE.MeshPhongMaterial({ color: 0xff0000, transparent:true, opacity:1 })
     );
-    // Cylinder by default points along Y. Rotate so it aligns with tokyoVec.
-    tokyoMarker.quaternion.setFromUnitVectors(
-        new THREE.Vector3(0, 1, 0), // cylinder default "up"
-        tokyoVec.clone().normalize() // direction from globe centre to Tokyo
-    );
+    tokyoMarker.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), tokyoVec.clone().normalize());
     tokyoMarker.position.copy(tokyoVec.clone().multiplyScalar(1.000));
     scene.add(tokyoMarker);
+
     let tokyoLabel = null;
     document.fonts.load('64px "Audiowide"').then(() => {
-        const tokyoLabel = makeTextSprite("Tokyo, JP", { fontsize: 100 });
+        tokyoLabel = makeTextSprite("Tokyo, JP", { fontsize: 100 });
         tokyoLabel.position.copy(tokyoVec.clone().multiplyScalar(1.001));
         scene.add(tokyoLabel);
-        // Optional: still hide later
-        setTimeout(() => { tokyoLabel.visible = false; }, 5000);
     });
-    // Cesena coords
-    const cesenaCoords = { lat: 44.1391, lon: 12.2466 };
+
+    // --- Cesena marker + label ---
+    const cesenaCoords = waypoints[2];
     const cesenaVec = latLonToVec3(cesenaCoords.lat, cesenaCoords.lon, 1.0);
-    // Marker (same as Tokyo's but hidden at first)
     const cesenaMarker = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.002, 0.002, 0.001, 16),
-        new THREE.MeshPhongMaterial({ color: 0xff0000 })
+        new THREE.CylinderGeometry(0.0015, 0.0015, 0.001, 16),
+        new THREE.MeshPhongMaterial({ color: 0xff0000, transparent:true, opacity:0 })
     );
-    cesenaMarker.quaternion.setFromUnitVectors(
-        new THREE.Vector3(0, 1, 0),
-        cesenaVec.clone().normalize()
-    );
+    cesenaMarker.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), cesenaVec.clone().normalize());
     cesenaMarker.position.copy(cesenaVec.clone().multiplyScalar(1.000));
-    // don’t add yet!
-    // Label (same helper)
-    const cesenaLabel = makeTextSprite("Cesena, IT", { fontsize: 64, color: "rgba(255,0,0,1.0)" });
+
+    const cesenaLabel = makeTextSprite("Cesena, IT", { fontsize: 64 });
     cesenaLabel.position.copy(cesenaVec.clone().multiplyScalar(1.001));
-    // don’t add yet!
-    let cesenaDelayFrames = null;   // will start counting when t hits 1
-    let cesenaAdded = false;
-    // Load Earth
+    cesenaLabel.material.opacity = 0; // start invisible
+    cesenaLabel.visible = false;
+
+    let cesenaDelayFrames = null;
+    let cesenaShown = false;
+
+    // --- Earth + animation ---
     new THREE.TextureLoader().load("earth.jpg", (tex) => {
         const earth = new THREE.Mesh(
             new THREE.SphereGeometry(1,64,64),
             new THREE.MeshPhongMaterial({ map: tex })
         );
         scene.add(earth);
+
         let t = 0;
-        let pauseFrames = 300
+        let pauseFrames = 300;
+        let tokyoFaded = false;
+
         function animate() {
             requestAnimationFrame(animate);
+
             if (pauseFrames > 0) {
                 pauseFrames--;
             } else {
-                t = Math.min(t + 0.0005, 1); // start moving only after pause
-                // Hide label after pause
-                if (tokyoLabel) tokyoLabel.visible = false;
+                t = Math.min(t + 0.0005, 1);
+                if (!tokyoFaded && tokyoLabel) {
+                    fadeOut(tokyoMarker, 60);
+                    fadeOut(tokyoLabel, 60);
+                    tokyoFaded = true;
+                }
             }
+
             if (t >= 1.0) {
                 if (cesenaDelayFrames === null) {
                     cesenaDelayFrames = 120; // ~2 seconds
                 } else if (cesenaDelayFrames > 0) {
                     cesenaDelayFrames--;
-                } else if (!cesenaAdded) {
+                } else if (!cesenaShown) {
                     scene.add(cesenaMarker);
                     scene.add(cesenaLabel);
-                    cesenaAdded = true;
+                    fadeIn(cesenaMarker, 60);
+                    fadeIn(cesenaLabel, 60);
+                    cesenaShown = true;
                 }
             }
+
             const pos = curve.getPointAt(t);
             let r;
-            if (t <= 0.5) {
-                r = THREE.MathUtils.lerp(R_start, R_mid, t / 0.5);
-            } else {
-                r = THREE.MathUtils.lerp(R_mid, R_start, (t - 0.5) / 0.5);
-            }
+            if (t <= 0.5) r = THREE.MathUtils.lerp(R_start, R_mid, t/0.5);
+            else r = THREE.MathUtils.lerp(R_mid, R_start, (t-0.5)/0.5);
+
             camera.position.copy(pos.clone().normalize().multiplyScalar(r));
             camera.lookAt(0,0,0);
             camera.up.copy(latLonToVec3(90,0,3).normalize());
