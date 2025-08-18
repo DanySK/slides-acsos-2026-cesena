@@ -11,13 +11,36 @@ aliases = [
 +++
 
 ---
-## Animated backgrounds
 
-{{< bg type="gradient" >}}
+{{< slide background-iframe="animations/flight-globe.html" background-interactive="true" >}}
 
-{{< bg type="particles" >}}
+## Tokyo → Cesena
 
-{{< bg type="ribbons" >}}
+---
+
+{{< slide background-iframe="animations/flight.html" background-interactive="true" >}}
+
+## Tokyo → Cesena
+
+---
+
+
+{{< slide background-iframe="animations/particles.html" background-interactive="true" >}}
+
+## Particles.js background
+
+---
+
+{{< slide background-iframe="animations/ribbons.html" background-interactive="true" >}}
+
+
+## Ribbons background
+
+---
+
+{{< slide background-iframe="animations/gradient.html" background-interactive="true" >}}
+
+## Gradient background
 
 ---
 

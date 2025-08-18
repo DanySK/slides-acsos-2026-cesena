@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Flight animation</title>
+    <style>
+        html,body { margin:0; height:100%; overflow:hidden; background:#fafafa; }
+        canvas { display:block; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three-globe@2.30.0"></script>
+</head>
+<body>
+<script>
+    const renderer = new THREE.WebGLRenderer({antialias:true});
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 2000);
+    camera.position.z = 400;
+
+    const light = new THREE.AmbientLight(0xffffff, 1);
+    scene.add(light);
+
+    const globe = new ThreeGlobe()
+        .globeImageUrl('//unpkg.com/three-globe/example/img/earth-light.jpg')
+        .arcsData([
+            { startLat:35.6895, startLng:139.6917, endLat:34.0522, endLng:-118.2437 }, // Tokyo→LA
+            { startLat:34.0522, startLng:-118.2437, endLat:44.1391, endLng:12.2466 }   // LA→Cesena
+        ])
+        .arcColor(() => ['#ff5555','#ff5555'])
+        .arcStroke(0.9)
+        .arcAltitude(0.2)
+        .arcDashLength(0.9)
+        .arcDashGap(2)
+        .arcDashAnimateTime(5000);
+
+    scene.add(globe);
+
+    function animate() {
+        globe.rotation.y += 0.002; // world moving
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+    }
+    animate();
+</script>
+</body>
+</html>
