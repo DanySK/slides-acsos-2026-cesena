@@ -9,6 +9,7 @@
 // @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
 // @import url('https://fonts.googleapis.com/css2?family=Ubuntu');
 @import url('https://fonts.googleapis.com/css2?family=Signika+Negative');
+@import url('https://fonts.googleapis.com/css2?family=Audiowide');
 // @import url('https://fonts.googleapis.com/css2?family=Open+Sans');
 
 // Serif
@@ -27,10 +28,10 @@
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono');
 // @import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono');
 
-$backgroundColor: #fff;
-
-$mainColor: #000;
-$headingColor: #111;
+$backgroundColor: #083b6f;
+//
+// $mainColor: #000;
+// $headingColor: #111;
 
 $mainFontSize: 2em;
 // $mainFont: 'Roboto', sans-serif;
@@ -39,8 +40,8 @@ $mainFontSize: 2em;
 // $headingFont: 'Source Sans Pro', Helvetica, sans-serif;
 // $mainFont: 'Ubuntu';
 // $headingFont: 'Ubuntu';
-$mainFont: 'Signika Negative';
-$headingFont: 'Signika Negative';
+$mainFont: 'Audiowide';
+$headingFont: 'Audiowide';
 // $mainFont: 'Open Sans';
 // $headingFont: 'Open Sans';
 
@@ -49,7 +50,7 @@ $headingFontWeight: 600;
 $linkColor: #2690e7;
 $linkColorHover: lighten( $linkColor, 25% );
 $selectionBackgroundColor: lighten( $linkColor, 25% );
-$detailBackgroundColor: #dae5e9;
+$detailBackgroundColor: #000080;
 $logo: url("../example-background-neg.svg");
 
 $heading1Size: 2.5em;
@@ -60,8 +61,8 @@ $heading4Size: 1.0em;
 @import "reveal-js/dist/theme/template/theme";
 
 section.has-light-background {
-	$detailBackgroundColor: #bd2b0b !global;
-	$logo: url("../example-background.svg") !global;
+	$detailBackgroundColor: #ffffff !global;
+	$logo: url("../example-background-neg.svg") !global;
 
 	&, h1, h2, h3, h4, h5, h6 {
 		color: #222;
@@ -260,14 +261,14 @@ kbd {
 	background-position: 0.45% 99.2%;
 	background-size: 15%;
 	background-clip: border-box;
-	border-radius: 30px;
+	border-radius: 0px;
 	border-style: none;
 	border-color: $detailBackgroundColor;
 	border-width: 0.3em;
 }
 
 .reveal .slide-background:after {
-	content: "Authors - Title - Venue Year";
+	content: "ACSOS 2026 Announcement";
 	position: absolute;
 	bottom: 2.5%;
 	right: 6%;
@@ -282,11 +283,11 @@ kbd {
   .reveal div.col {
 	// draw a red border
 	// border: 1px solid red;
-	text-align: left;
-	border: .2em dashed $detailBackgroundColor;
-	border-style: double;
-	border-radius: 1em;
-	padding: 0.5em;
+// 	text-align: center;
+// 	border: .1em solid #000000;
+// 	border-style: saturate;
+// 	border-radius: .5em;
+// 	padding: 0.5em;
 }
 
 .reveal div.container {

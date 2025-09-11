@@ -1,8 +1,8 @@
 
 +++
 
-title = "Guide for writing markdown slides"
-description = "A Hugo theme for creating Reveal.js presentations"
+title = "ACSOS 2026 Announcement"
+description = "Acsos 2026 Announcement"
 outputs = ["Reveal"]
 aliases = [
     "/guide/"
@@ -10,15 +10,66 @@ aliases = [
 
 +++
 
+{{< slide background-iframe="animations/acsos-marquee.html?src=acsos-logo.svg&speed=100&gap=5&size=24&bg=%23083b6f&colw=46vw&pad=4vmin&fit=width" background-interactive="false" >}}
+
+---
+
+<img src="animations/acsos-logo-2026.svg"
+style="width:35em" />
+
 ---
 
 {{< slide background-iframe="animations/flight-globe.html" background-interactive="true" >}}
 
 ---
 
-{{< slide background-iframe="animations/flight.html" background-interactive="true" >}}
+{{< slide background-video="tesori-shorter-zoom.mkv" background-video-loop="true" background-video-muted="true" background-opacity="0.95">}}
 
-## Tokyo → Cesena
+<img src="acsos-logo-cesena-dates.svg"
+style="width:35em" />
+
+---
+
+<img src="acsos-logo-cesena.svg"
+alt="ACSOS 2026 logo"
+style="position:absolute; top:-2em; right:0em; width:25vmin; z-index:10; pointer-events:none;" />
+
+
+# General Chairs
+
+{{< multicol >}}
+{{< col >}}
+<img src="ivana.jpg" alt="Danilo" style="width:18em" /><br>
+Ivana Dusparic<br>
+Trinity College Dublin, Ireland
+{{< /col >}}
+{{< col >}}
+<img src="danilo.jpg" alt="Danilo" style="width:18em" /><br>
+Danilo Pianini<br>
+University of Bologna, Italy
+{{< /col >}}
+{{< /multicol >}}
+
+---
+
+# Program Chairs
+
+{{< multicol >}}
+{{< col >}}
+<img src="robert.jpg" alt="Danilo" style="width:18em" /><br>
+Robert René Maria Birke<br>
+University of Turin, Italy
+{{< /col >}}
+{{< col >}}
+<img src="christian.JPG" alt="Danilo" style="width:18em" /><br>
+Christian Krupizer<br>
+University of Hohenheim, Germany
+{{< /col >}}
+{{< /multicol >}}
+
+---
+
+# ACSOS 2022 Special Event
 
 ---
 

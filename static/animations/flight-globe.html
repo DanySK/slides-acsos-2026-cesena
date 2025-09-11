@@ -102,7 +102,7 @@
     const tokyoCoords = waypoints[0];
     const tokyoVec = latLonToVec3(tokyoCoords.lat, tokyoCoords.lon, 1.0);
     const tokyoMarker = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.0015, 0.0015, 0.001, 16),
+        new THREE.CylinderGeometry(0.0014, 0.0014, 0.001, 16),
         new THREE.MeshPhongMaterial({ color: 0xff0000, transparent:true, opacity:1 })
     );
     tokyoMarker.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), tokyoVec.clone().normalize());
@@ -120,7 +120,7 @@
     const cesenaCoords = waypoints[2];
     const cesenaVec = latLonToVec3(cesenaCoords.lat, cesenaCoords.lon, 1.0);
     const cesenaMarker = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.0015, 0.0015, 0.001, 16),
+        new THREE.CylinderGeometry(0.0011, 0.0011, 0.001, 16),
         new THREE.MeshPhongMaterial({ color: 0xff0000, transparent:true, opacity:0 })
     );
     cesenaMarker.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), cesenaVec.clone().normalize());
