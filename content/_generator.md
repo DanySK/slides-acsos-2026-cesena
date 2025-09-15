@@ -139,6 +139,8 @@ University of Hohenheim, Germany
 
 ---
 
+{{< slide background-iframe="animations/ribbons.html" background-interactive="true" >}}
+
 # Nearby: Ravenna
 
 * UNESCO World Heritage Site
@@ -161,6 +163,8 @@ University of Hohenheim, Germany
 {{< slide background-image="https://upload.wikimedia.org/wikipedia/commons/5/56/Mosaic_of_Theodora_-_Basilica_San_Vitale_%28Ravenna%29.jpg" >}}
 
 ---
+
+{{< slide background-iframe="animations/ribbons.html" background-interactive="true" >}}
 
 # Nearby: Rimini
 
@@ -190,6 +194,8 @@ University of Hohenheim, Germany
 
 ---
 
+{{< slide background-iframe="animations/ribbons.html" background-interactive="true" >}}
+
 # Nearby: Republic of San Marino 🇸🇲
 
 * One of the world's smallest and oldest republics
@@ -202,6 +208,8 @@ University of Hohenheim, Germany
 {{< slide background-image="https://upload.wikimedia.org/wikipedia/commons/3/3d/View_of_Mount_Titano_-_San_Marino.jpg" >}}
 
 ---
+
+{{< slide background-iframe="animations/ribbons.html" background-interactive="true" >}}
 
 # Nearby: Imola and Misano International Circuits
 
