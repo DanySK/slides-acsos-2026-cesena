@@ -4,9 +4,6 @@
 title = "ACSOS 2026 Announcement"
 description = "Acsos 2026 Announcement"
 outputs = ["Reveal"]
-aliases = [
-    "/guide/"
-]
 
 +++
 
